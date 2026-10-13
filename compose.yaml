@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: cmpe
+      POSTGRES_USER: cmpe
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in a local .env file}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cmpe -d cmpe"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [internal]
+    restart: unless-stopped
+  api:
+    build: .
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      CMPE_DATABASE_URL: postgresql+psycopg://cmpe:${POSTGRES_PASSWORD}@postgres:5432/cmpe
+      CMPE_INGEST_TOKEN: ${CMPE_INGEST_TOKEN:?Missing submitter credential}
+      CMPE_REVIEWER_A_TOKEN: ${CMPE_REVIEWER_A_TOKEN:?Missing reviewer A credential}
+      CMPE_REVIEWER_B_TOKEN: ${CMPE_REVIEWER_B_TOKEN:?Missing reviewer B credential}
+      CMPE_PLANNER_TOKEN: ${CMPE_PLANNER_TOKEN:?Missing planner credential}
+    depends_on:
+      postgres: {condition: service_healthy}
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    networks: [internal]
+    restart: unless-stopped
+  # Postgres has no publicly published port. Use a managed DB + TLS for hosted deployments.
+volumes:
+  postgres_data:
+networks:
+  internal:

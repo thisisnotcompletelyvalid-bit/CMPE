@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CMPE Planning Console</title>
+<style>
+body{background:#101a20;color:#e8f2f1;font:16px system-ui,sans-serif;margin:0}
+main{max-width:960px;margin:auto;padding:36px 20px}h1{letter-spacing:-.04em}
+a{color:#99ddd1}button,input{padding:12px;font:inherit;border-radius:7px}
+input{background:#24353d;color:white;border:1px solid #557078;width:300px;max-width:95%}
+button{background:#43877a;color:white;border:0;cursor:pointer}button:hover{background:#51a491}
+section{padding:20px;background:#1a2b33;border:1px solid #36535f;border-radius:13px;margin:18px 0}
+pre{white-space:pre-wrap;word-break:break-word;background:#0e191f;padding:14px;border-radius:6px;max-height:400px;overflow:auto}
+small{color:#aac4c6}code{color:#b8e6dc}
+</style></head>
+<body><main><h1>CMPE <small>v3 alpha</small></h1>
+<p>Persistent physical-economy research console. Advisory simulations only; no production orders or personal records.</p>
+<section><h2>Connectivity</h2><p id="health">Checking...</p></section>
+<section><h2>Protected console</h2><p>Paste a local development token for your assigned role. It stays in memory; the interface never stores it.</p><input id="key" type="password" autocomplete="off" placeholder="Your role token">
+<button id="status">Show status</button><button id="datasets">Review datasets</button><button id="observations">View public observations</button><button id="plan">Run approved simulation</button></section>
+<section><h2>Submit or approve physical-economy datasets</h2><p><small>Submit a JSON file matching data/examples/fictional_economy.json, with the ingest token above. Dataset approval requires two separate reviewer credentials.</small></p><input id="dataset-file" type="file" accept=".json,application/json"><button id="submit">Stage JSON dataset</button><p><input id="dataset-id" type="number" min="1" placeholder="Dataset ID"><button id="approve">Approve selected dataset</button></p></section>
+<section><h2>Results</h2><pre id="output">Use the controls above; dataset submission and approvals are available via the documented JSON API.</pre></section>
+<p><small>Security: use HTTPS, managed identity, audited deployments, and independent physical verification before any real-world pilot. GitHub Actions are not a production server or database.</small></p></main>
+<script src="/assets/console.js"></script></body></html>
