@@ -16,13 +16,13 @@ def test_dashboard_is_reproducible(tmp_path):
     assert json.loads(raw)["status"].startswith("FICTIONAL")
 
 def test_physical_series_unit_validation():
-    s=[{"location":"USA","indicator":"EG.ELC.PROD.KH","unit":"kWh","period":"2014","value":10.0}]
-    assert validate_series(s,"USA","EG.ELC.PROD.KH")
+    s=[{"location":"USA","indicator":"EN.ATM.CO2E.KT","unit":"kt CO2","period":"2014","value":10.0}]
+    assert validate_series(s,"USA","EN.ATM.CO2E.KT")
     with pytest.raises(ValueError):
-        validate_series(s+s,"USA","EG.ELC.PROD.KH")
+        validate_series(s+s,"USA","EN.ATM.CO2E.KT")
     s[0]["unit"]="USD"
     with pytest.raises(ValueError):
-        validate_series(s,"USA","EG.ELC.PROD.KH")
+        validate_series(s,"USA","EN.ATM.CO2E.KT")
 
 def test_archive_is_content_addressed_and_idempotent(tmp_path,monkeypatch):
     monkeypatch.delenv("CMPE_ARCHIVE_BUCKET",raising=False)
