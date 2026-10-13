@@ -11,7 +11,7 @@ from pathlib import Path
 from .worldbank import fetch, INDICATORS
 
 COUNTRIES={"USA":"United States","CHN":"China","DEU":"Germany","IND":"India"}
-PHYSICAL="EN.ATM.CO2E.KT"
+PHYSICAL="EN.GHG.CO2.MT.CE.AR5"
 ACCESS="EG.ELC.ACCS.ZS"
 
 def validate_series(items, country, code):

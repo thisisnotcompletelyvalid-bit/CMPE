@@ -4,7 +4,7 @@ A continually refreshed research publication using **historical** World Bank emi
 
 ## Automated publication path
 
-1. GitHub Actions fetches `EN.ATM.CO2E.KT` (annual carbon dioxide emissions, kt) and `EG.ELC.ACCS.ZS` (electricity access percentage) for USA, CHN, DEU and IND.
+1. GitHub Actions fetches `EN.GHG.CO2.MT.CE.AR5` (annual carbon dioxide emissions, Mt CO₂e) and `EG.ELC.ACCS.ZS` (electricity access percentage) for USA, CHN, DEU and IND.
 2. Enforces allowlisted identifiers, exact declared units, nonnegative finite values, year bounds, absence of duplicate years and a physical-observations minimum.
 3. Generates static HTML, data.json and a SHA256 check; uploads an independently inspectable artifact.
 4. On main, updates the `public-data` repository branch with `latest.json` and a date-specific snapshot. Only small public curated data in Git; no private data.
@@ -25,4 +25,4 @@ Optional `CMPE_ARCHIVE_BUCKET` points to an S3-compatible evidence archive (in a
 
 Crucially no public observation automatically becomes a production technology coefficient or a planning instruction.
 
-Data licensing: World Bank metadata identifies Climate Watch as an underlying provider for some emissions series and may impose noncommercial license terms. Preserve attribution and verify current reuse rights before production or commercial redistribution.
+Data licensing: World Bank lists the newer EDGAR/JRC and IEA sourced emissions series under the World Development Indicators program, with CC BY 4.0 indicated on the country data pages. Attribute World Bank and underlying source; confirm licensing before redistribution.

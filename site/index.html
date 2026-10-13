@@ -25,13 +25,13 @@ select{background:#19353e;color:white;padding:8px;border-radius:6px;border:1px s
 <p>Public economic observations, preserved with source hashes and explicit units. Historical data is not a real-time control system, and these figures are not production coefficients or validated planning orders.</p>
 </header>
 <div class="stats" id="stats"><div class="card">Loading verified source report…</div></div>
-<div class="top"><h2>Historical carbon dioxide emissions</h2><label>Country <select id="country"><option value="all">All</option></select></label></div>
+<div class="top"><h2>Historical carbon dioxide emissions excluding land-use changes</h2><label>Country <select id="country"><option value="all">All</option></select></label></div>
 <div id="charts" class="grid"></div>
 <div class="card" style="margin-top:22px">
 <h2>Data and provenance</h2>
 <p id="status">Loading…</p>
 <div id="details" class="foot"></div>
-<p class="foot">Source: <a href="https://databank.worldbank.org/metadataglossary/world-development-indicators/series/EN.ATM.CO2E.KT">World Bank EG.ELC.PROD.KH</a>. CO₂ emissions are expressed in kilotonnes, based on historical greenhouse-gas accounting. These are not electricity-generation or live emissions measurements. Validate licensing and coverage before use.</p></div>
+<p class="foot">Source: <a href="https://databank.worldbank.org/metadataglossary/world-development-indicators/series/EN.GHG.CO2.MT.CE.AR5">World Bank EG.ELC.PROD.KH</a>. CO₂ emissions are expressed in million tonnes (Mt CO₂e), based on historical greenhouse-gas accounting. These are not electricity-generation or live emissions measurements. Validate licensing and coverage before use.</p></div>
 </main>
 <script>
 "use strict";
@@ -50,7 +50,7 @@ async function init(){
  try{
   const res=await fetch("data.json",{cache:"no-store"});
   if(!res.ok)throw Error("Report unavailable: HTTP "+res.status);
-  const d=await res.json();const all=d.series.filter(s=>s.indicator==="EN.ATM.CO2E.KT");
+  const d=await res.json();const all=d.series.filter(s=>s.indicator==="EN.GHG.CO2.MT.CE.AR5");
   if(!all.length)throw Error("No physical electricity series published");
   $("#stats").replaceChildren();
   let latest=all.reduce((n,s)=>Math.max(n,Number(s.latest.period)),0);
@@ -63,7 +63,7 @@ async function init(){
   function display(){
    $("#charts").replaceChildren();
    for(const s of all.filter(s=>select.value==="all"||s.country===select.value)){
-    const box=cell("article","","card");box.append(cell("h2",s.country_name),cell("strong",compact(s.latest.value)+" kt CO₂"),cell("small","Latest observed: "+s.latest.period));
+    const box=cell("article","","card");box.append(cell("h2",s.country_name),cell("strong",compact(s.latest.value)+" Mt CO₂e"),cell("small","Latest observed: "+s.latest.period));
     chart(box,s);box.append(cell("small","Series SHA-256: "+s.source_sha256.slice(0,18)+"…"));$("#charts").append(box);
    }
   } select.addEventListener("change",display);display();

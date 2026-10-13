@@ -12,6 +12,7 @@ INDICATORS={
     "EG.ELC.ACCS.ZS":"percent of population",
     "EG.ELC.PROD.KH":"kWh",
     "EN.ATM.CO2E.KT":"kt CO2",
+    "EN.GHG.CO2.MT.CE.AR5":"Mt CO2e",
 }
 COUNTRIES={"USA","CHN","VNM","CUB","LAO","DEU","IND","BRA","ZAF","MEX"}
 
