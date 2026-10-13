@@ -31,6 +31,8 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
+      - name: Reproducible static-site smoke test
+        run: python -m cmpe.public_report --demo --out site-build
       - name: Static compile check
         run: python -m compileall -q cmpe
       - name: Build service image

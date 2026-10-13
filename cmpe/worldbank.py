@@ -10,6 +10,7 @@ INDICATORS={
     "SP.POP.TOTL":"persons",
     "NY.GDP.MKTP.CD":"current USD (not a physical quantity)",
     "EG.ELC.ACCS.ZS":"percent of population",
+    "EG.ELC.PROD.KH":"kWh",
 }
 COUNTRIES={"USA","CHN","VNM","CUB","LAO","DEU","IND","BRA","ZAF","MEX"}
 

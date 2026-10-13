@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><title>CMPE · Public Physical-Economic Observatory</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#0a141a;color:#e9f4f2}
+*{box-sizing:border-box}body{margin:0}main{max-width:1100px;margin:auto;padding:46px 22px 90px}
+header{border-bottom:1px solid #34505a;padding-bottom:28px}
+.top{display:flex;gap:16px;align-items:center;justify-content:space-between}
+h1{font-size:clamp(30px,5vw,52px);letter-spacing:-.06em;margin:18px 0 7px}
+h2{font-size:18px;margin:0 0 18px}
+p{line-height:1.65;color:#abc7c5}
+.tag{border:1px solid #426b6a;color:#b5eee5;padding:6px 12px;border-radius:999px;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:25px 0}
+.card{background:#11252b;border:1px solid #2c4b54;border-radius:15px;padding:22px}
+.card strong{font-size:27px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.card small{display:block;color:#9fc0bb;margin-top:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
+.spark{width:100%;height:110px}svg path{fill:none;stroke:#6ee0c3;stroke-width:2.8;stroke-linejoin:round}
+a{color:#9be9d6}code{overflow-wrap:anywhere}
+.foot{font-size:13px;color:#94aeae;line-height:1.8}
+select{background:#19353e;color:white;padding:8px;border-radius:6px;border:1px solid #54757b}
+</style></head><body><main>
+<header><div class="top"><span class="tag">CMPE · RESEARCH OBSERVATORY</span><a href="https://github.com/thisisnotcompletelyvalid-bit/CMPE">Source and methods ↗</a></div>
+<h1>A measurable physical economy.</h1>
+<p>Public economic observations, preserved with source hashes and explicit units. Historical data is not a real-time control system, and these figures are not production coefficients or validated planning orders.</p>
+</header>
+<div class="stats" id="stats"><div class="card">Loading verified source report…</div></div>
+<div class="top"><h2>Historical electricity production</h2><label>Country <select id="country"><option value="all">All</option></select></label></div>
+<div id="charts" class="grid"></div>
+<div class="card" style="margin-top:22px">
+<h2>Data and provenance</h2>
+<p id="status">Loading…</p>
+<div id="details" class="foot"></div>
+<p class="foot">Source: <a href="https://databank.worldbank.org/metadataglossary/world-development-indicators/series/EG.ELC.PROD.KH">World Bank EG.ELC.PROD.KH</a>. Electricity production is measured in kWh; this older annual series should not be interpreted as present-day grid availability or dispatch. Use official utility measurements for operational models.</p></div>
+</main>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+function cell(tag,text,cl){const e=document.createElement(tag);e.textContent=text;if(cl)e.className=cl;return e}
+const compact=v=>Intl.NumberFormat("en",{notation:"compact",maximumFractionDigits:2}).format(v);
+function chart(parent,series){
+ const vals=series.history.map(v=>v.value);
+ const lo=Math.min(...vals),hi=Math.max(...vals),span=Math.max(1,hi-lo);
+ const coords=vals.map((v,i)=>((i/(vals.length-1||1))*320).toFixed(1)+","+(100-90*(v-lo)/span).toFixed(1));
+ const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+ svg.setAttribute("viewBox","0 0 320 110");svg.setAttribute("class","spark");svg.setAttribute("role","img");svg.setAttribute("aria-label","Trend from "+series.history[0].year+" to "+series.latest.period);
+ const path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d","M"+coords.join(" L"));svg.appendChild(path);parent.appendChild(svg);
+}
+async function init(){
+ try{
+  const res=await fetch("data.json",{cache:"no-store"});
+  if(!res.ok)throw Error("Report unavailable: HTTP "+res.status);
+  const d=await res.json();const all=d.series.filter(s=>s.indicator==="EG.ELC.PROD.KH");
+  if(!all.length)throw Error("No physical electricity series published");
+  $("#stats").replaceChildren();
+  let latest=all.reduce((n,s)=>Math.max(n,Number(s.latest.period)),0);
+  for(const [k,v] of [["Countries",String(all.length)],["Physical series",String(all.length)],["Latest observed year",String(latest)],["Last compiled",String(d.updated_utc).slice(0,10)]]) {
+   let box=cell("div","","card");box.append(cell("small",k),cell("strong",v));$("#stats").append(box);
+  }
+  $("#status").textContent=d.status;
+  $("#details").textContent="Source: World Bank Indicators API v2. Compiled "+d.updated_utc+". Data records carry source SHA-256 in data.json. Physical series are historical and may be many years old.";
+  const select=$("#country");for(const s of all){let option=cell("option",s.country_name);option.value=s.country;select.append(option)}
+  function display(){
+   $("#charts").replaceChildren();
+   for(const s of all.filter(s=>select.value==="all"||s.country===select.value)){
+    const box=cell("article","","card");box.append(cell("h2",s.country_name),cell("strong",compact(s.latest.value)+" kWh"),cell("small","Latest observed: "+s.latest.period));
+    chart(box,s);box.append(cell("small","Series SHA-256: "+s.source_sha256.slice(0,18)+"…"));$("#charts").append(box);
+   }
+  } select.addEventListener("change",display);display();
+ }catch(e){$("#stats").replaceChildren(cell("p","Public data unavailable: "+String(e)));$("#status").textContent="Publication failed closed."}
+}init();
+</script></body></html>
