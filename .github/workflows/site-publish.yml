@@ -80,9 +80,37 @@ jobs:
             git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "data: publish verified public observations $today"
             git push origin HEAD:public-data
           fi
-  deploy:
+  pages_status:
     if: github.event_name != 'pull_request'
     needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Detect GitHub Pages enablement
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl -sS -o /tmp/cmpe-pages-response -w '%{http_code}' \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")"
+          case "$status" in
+            200) echo "enabled=true" >> "$GITHUB_OUTPUT" ;;
+            404) echo "enabled=false" >> "$GITHUB_OUTPUT"
+                 echo "::notice::GitHub Pages disabled; public-data snapshots remain available." ;;
+            *) echo "::error::Pages status check failed with HTTP $status"
+               exit 1 ;;
+          esac
+  deploy:
+    if: github.event_name != 'pull_request' && needs.pages_status.outputs.enabled == 'true'
+    needs: [build, pages_status]
     runs-on: ubuntu-latest
     permissions:
       contents: read
