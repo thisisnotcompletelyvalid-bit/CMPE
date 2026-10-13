@@ -1,0 +1,96 @@
+name: Publish physical-economic observatory
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cmpe/public_report.py"
+      - "cmpe/worldbank.py"
+      - "site/**"
+      - ".github/workflows/site-publish.yml"
+  schedule:
+    - cron: "41 10 * * 2"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "cmpe/public_report.py"
+      - "cmpe/worldbank.py"
+      - "site/**"
+      - ".github/workflows/site-publish.yml"
+permissions:
+  contents: read
+concurrency:
+  group: cmpe-public-observatory
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r requirements.txt
+      - name: Collect official historical electricity observations
+        run: python -m cmpe.public_report --out site-build --countries USA CHN DEU IND
+      - name: Verify published file digest
+        run: cd site-build && sha256sum -c data.sha256
+      - name: Retain public machine-readable snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-physical-observations
+          path: site-build/
+          retention-days: 30
+      - name: Package website for Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site-build/
+  persist:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: public-physical-observations
+          path: /tmp/cmpe-published
+      - name: Append verified public observation snapshot to data branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/cmpe-published
+          sha256sum -c data.sha256
+          cd "$GITHUB_WORKSPACE"
+          git fetch origin public-data
+          git checkout -B public-data origin/public-data
+          mkdir -p data/public/snapshots
+          today="$(date -u +%F)"
+          cp /tmp/cmpe-published/data.json data/public/latest.json
+          cp /tmp/cmpe-published/data.sha256 data/public/latest.sha256
+          cp /tmp/cmpe-published/data.json "data/public/snapshots/$today.json"
+          git add data/public
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "data: publish verified public observations $today"
+            git push origin HEAD:public-data
+          fi
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy public report (requires Settings > Pages > GitHub Actions)
+        id: deployment
+        uses: actions/deploy-pages@v4

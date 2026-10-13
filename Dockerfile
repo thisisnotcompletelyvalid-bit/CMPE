@@ -4,6 +4,9 @@ WORKDIR /opt/cmpe
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && useradd -u 10001 -m cmpe
 COPY cmpe cmpe
+COPY alembic.ini ./
+COPY migrations migrations
+COPY site site
 USER 10001
 EXPOSE 8080
 CMD ["uvicorn","cmpe.api:app","--host","0.0.0.0","--port","8080"]

@@ -10,6 +10,9 @@ INDICATORS={
     "SP.POP.TOTL":"persons",
     "NY.GDP.MKTP.CD":"current USD (not a physical quantity)",
     "EG.ELC.ACCS.ZS":"percent of population",
+    "EG.ELC.PROD.KH":"kWh",
+    "EN.ATM.CO2E.KT":"kt CO2",
+    "EN.GHG.CO2.MT.CE.AR5":"Mt CO2e",
 }
 COUNTRIES={"USA","CHN","VNM","CUB","LAO","DEU","IND","BRA","ZAF","MEX"}
 
@@ -21,7 +24,7 @@ def fetch(country,indicator,opener=urlopen):
         raw=response.read(2_000_001)
     if len(raw)>2_000_000:raise ValueError("public response too large")
     payload=json.loads(raw)
-    if not isinstance(payload,list) or len(payload)!=2 or not isinstance(payload[1],list):raise ValueError("unexpected provider shape")
+    if not isinstance(payload,list) or len(payload)!=2 or not isinstance(payload[1],list):raise ValueError(f"World Bank has no supported records for {country}/{indicator}: {str(payload)[:200]}")
     items=[]
     for entry in payload[1]:
         year=str(entry.get("date",""))

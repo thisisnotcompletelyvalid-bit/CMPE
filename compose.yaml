@@ -23,8 +23,10 @@ services:
       CMPE_REVIEWER_A_TOKEN: ${CMPE_REVIEWER_A_TOKEN:?Missing reviewer A credential}
       CMPE_REVIEWER_B_TOKEN: ${CMPE_REVIEWER_B_TOKEN:?Missing reviewer B credential}
       CMPE_PLANNER_TOKEN: ${CMPE_PLANNER_TOKEN:?Missing planner credential}
+      CMPE_REQUIRE_MIGRATIONS: "1"
     depends_on:
       postgres: {condition: service_healthy}
+    command: ["/bin/sh", "-c", "python -m alembic upgrade head && exec uvicorn cmpe.api:app --host 0.0.0.0 --port 8080"]
     read_only: true
     tmpfs: [/tmp]
     security_opt: ["no-new-privileges:true"]
