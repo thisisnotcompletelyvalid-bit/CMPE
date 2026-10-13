@@ -1,0 +1,15 @@
+{
+  "source":"fictional-test-economy-v1",
+  "economy":{
+    "name":"Fictional electricity and food economy",
+    "units":{"electricity":"MWh","food":"bundle"},
+    "activities":[
+      {"name":"power","inputs":{},"outputs":{"electricity":1},"labor_hours":0.2,"emissions_kg":0.5,"capacity":100},
+      {"name":"farm","inputs":{"electricity":0.2},"outputs":{"food":1},"labor_hours":1.0,"emissions_kg":0.1,"capacity":60}
+    ],
+    "essential_needs":{"electricity":50,"food":40},
+    "labor_budget_hours":160,
+    "emissions_budget_kg":100,
+    "provenance":"SYNTHETIC GENERATED FIXTURE: no measured production data"
+  }
+}

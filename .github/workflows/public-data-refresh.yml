@@ -1,0 +1,25 @@
+name: Public indicators validation
+on:
+  schedule:
+    - cron: "23 9 * * 2"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch-world-bank:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Download public aggregate World Bank indicators
+        run: python -m cmpe.worldbank --country USA --out data/snapshots/worldbank_USA.json
+      - name: Keep versioned short-lived artifact; do not commit high-volume data to Git
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldbank-usa-public
+          path: data/snapshots/worldbank_USA.json
+          retention-days: 14
