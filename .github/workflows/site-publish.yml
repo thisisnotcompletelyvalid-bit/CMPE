@@ -73,7 +73,7 @@ jobs:
           today="$(date -u +%F)"
           cp /tmp/cmpe-published/data.json data/public/latest.json
           cp /tmp/cmpe-published/data.sha256 data/public/latest.sha256
-          digest="$(cut -d\x27 \x27 -f1 /tmp/cmpe-published/data.sha256)"
+          digest="$(awk '{print $1}' /tmp/cmpe-published/data.sha256)"
           cp /tmp/cmpe-published/data.json "data/public/snapshots/$today-$digest.json"
           git add data/public
           if ! git diff --cached --quiet; then
