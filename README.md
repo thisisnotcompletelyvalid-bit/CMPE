@@ -4,10 +4,24 @@
 
 **Status: v3 alpha, research and advisory simulations only.** An open, inspectable service for physical-economic data, authenticated submissions, two-person approval and linear planning. No personal data, no automatic economic orders, no production-critical control endpoints.
 
+## Public physical-economy observatory (automated)
+
+A separate read-only public report now validates official historical physical carbon-dioxide emissions in **Mt CO₂e**, excluding land-use change, and electricity access for USA, China, Germany and India.
+
+- [Publication workflow](https://github.com/thisisnotcompletelyvalid-bit/CMPE/actions/workflows/site-publish.yml): verifies the live World Bank API and publishes dated, SHA-256-checked data snapshots every Tuesday.
+- [Persistent small public-data snapshots](https://github.com/thisisnotcompletelyvalid-bit/CMPE/tree/public-data/data/public): GitHub branch, usable as static JSON. **Not** suitable for high-volume or sensitive national data.
+- [Static dashboard](https://thisisnotcompletelyvalid-bit.github.io/CMPE/): only live when GitHub Pages has been enabled in repository **Settings → Pages → Source: GitHub Actions** and the deploy job is successful.
+- [Source and retention rules](docs/PUBLIC_OBSERVATORY.md).
+
+Run `python -m cmpe.public_report --out site-build` to independently reconstruct the public site; for offline deterministic smoke tests use `--demo` (clearly labeled fictional).
+Historical observations are not live energy generation measurements, input-output coefficients or national production data. The archived World Bank electricity-generation indicator was rejected by the current source API, so this release uses a newer EDGAR/JRC emissions series and does **not** claim a calibrated electricity grid.
+
+Persistent server deployments require an independently provisioned VM or container service, a database and secured storage. GitHub Actions is not an always-on web server.
+
 ## What works in this branch
 
 - Web console and FastAPI with protected JSON endpoints.
-- Relational persistence via PostgreSQL (SQLite is restricted to local tests).
+- Relational persistence via PostgreSQL (SQLite is restricted to local tests), with an Alembic initial migration and a container startup migration gate.
 - Validated, explicit-unit input-output model, bounded inputs and deterministic SciPy/HiGHS planning.
 - Two distinct reviewer credentials are required before any dataset becomes active.
 - Public World Bank indicator importer that keeps national statistics separate from technical production coefficients.
@@ -47,7 +61,7 @@ These indicators are not automatically promoted into production functions or pla
 
 ```bash
 pip install -r requirements.txt
-pytest -q
+python -m pytest -q
 python -m compileall -q cmpe
 ```
 
