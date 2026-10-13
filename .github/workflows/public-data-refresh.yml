@@ -1,5 +1,10 @@
 name: Public indicators validation
 on:
+  push:
+    branches: [main]
+    paths:
+      - "cmpe/worldbank.py"
+      - ".github/workflows/public-data-refresh.yml"
   schedule:
     - cron: "23 9 * * 2"
   workflow_dispatch:
