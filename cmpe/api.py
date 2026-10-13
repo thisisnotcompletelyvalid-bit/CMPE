@@ -3,7 +3,7 @@ import os, json, hashlib, hmac
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Header, HTTPException, Depends, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select, func, text
 from sqlalchemy.exc import IntegrityError
@@ -75,6 +75,10 @@ def ready():
 @app.get("/")
 def index():
     return HTMLResponse(Path(__file__).with_name("ui.html").read_text())
+
+@app.get("/assets/console.js")
+def script():
+    return FileResponse(Path(__file__).with_name("console.js"),media_type="text/javascript")
 
 @app.get("/v1/status")
 def status(_:str=Depends(credential("INGEST","REVIEWER_A","REVIEWER_B","PLANNER"))):

@@ -16,13 +16,7 @@ small{color:#aac4c6}code{color:#b8e6dc}
 <section><h2>Connectivity</h2><p id="health">Checking...</p></section>
 <section><h2>Protected console</h2><p>Paste a local development token for your assigned role. It stays in memory; the interface never stores it.</p><input id="key" type="password" autocomplete="off" placeholder="Your role token">
 <button id="status">Show status</button><button id="datasets">Review datasets</button><button id="observations">View public observations</button><button id="plan">Run approved simulation</button></section>
+<section><h2>Submit or approve physical-economy datasets</h2><p><small>Submit a JSON file matching data/examples/fictional_economy.json, with the ingest token above. Dataset approval requires two separate reviewer credentials.</small></p><input id="dataset-file" type="file" accept=".json,application/json"><button id="submit">Stage JSON dataset</button><p><input id="dataset-id" type="number" min="1" placeholder="Dataset ID"><button id="approve">Approve selected dataset</button></p></section>
 <section><h2>Results</h2><pre id="output">Use the controls above; dataset submission and approvals are available via the documented JSON API.</pre></section>
 <p><small>Security: use HTTPS, managed identity, audited deployments, and independent physical verification before any real-world pilot. GitHub Actions are not a production server or database.</small></p></main>
-<script>
-const show=(data)=>document.getElementById('output').textContent=JSON.stringify(data,null,2);
-fetch('/health/ready').then(r=>r.json().then(x=>document.getElementById('health').textContent=r.status+' · '+JSON.stringify(x))).catch(()=>document.getElementById('health').textContent='Disconnected');
-async function call(path,method='GET'){const token=document.getElementById('key').value; const r=await fetch(path,{method,headers:{'X-CMPE-Key':token}});show({http_status:r.status,data:await r.json()})}
-for(const [id,path,method] of [['status','/v1/status','GET'],['datasets','/v1/datasets','GET'],['observations','/v1/observations','GET'],['plan','/v1/plans','POST']]){
-document.getElementById(id).addEventListener('click',()=>call(path,method).catch(e=>show({error:String(e)})));
-}
-</script></body></html>
+<script src="/assets/console.js"></script></body></html>
