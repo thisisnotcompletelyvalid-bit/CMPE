@@ -3,7 +3,7 @@
 Every report is quarantined and must be independently reviewed. No report feeds
 the optimizer automatically. This protects the optimizer's trusted-input boundary.
 """
-import base64
+import base64\nimport binascii
 import hashlib
 import json
 import math
@@ -84,7 +84,7 @@ def authenticate(envelope:SignedEnvelope)->str:
         sig=base64.b64decode(envelope.signature,validate=True)
         if len(key)!=32 or len(sig)!=64:raise ValueError("wrong key or signature length")
         Ed25519PublicKey.from_public_bytes(key).verify(sig,canonical(envelope.report))
-    except (KeyError,ValueError,TypeError,InvalidSignature,json.JSONDecodeError) as e:
+    except (KeyError,ValueError,TypeError,InvalidSignature,json.JSONDecodeError,binascii.Error) as e:
         raise ValueError("invalid or unregistered report signature") from e
     return hashlib.sha256(canonical(envelope.report)).hexdigest()
 
