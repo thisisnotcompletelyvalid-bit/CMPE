@@ -9,7 +9,9 @@ from sqlalchemy import select, func, text
 from sqlalchemy.exc import IntegrityError
 from .db import engine, initialize, sessionmaker_for, Dataset, Approval, Plan, Observation, SignedReport, ReportReview
 from .schema import Economy
-from .optimizer import optimize\nfrom .catalog import inventory, readiness as assess_readiness\nfrom .reporting import SignedEnvelope, authenticate, flag_reconciliation
+from .optimizer import optimize
+from .catalog import inventory, readiness as assess_readiness
+from .reporting import SignedEnvelope, authenticate, flag_reconciliation
 
 ENG=engine()
 Session=sessionmaker_for(ENG)
