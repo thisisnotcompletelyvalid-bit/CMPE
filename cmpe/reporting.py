@@ -3,7 +3,8 @@
 Every report is quarantined and must be independently reviewed. No report feeds
 the optimizer automatically. This protects the optimizer's trusted-input boundary.
 """
-import base64\nimport binascii
+import base64
+import binascii
 import hashlib
 import json
 import math
