@@ -61,7 +61,7 @@ The current World Bank historical CO2 and electricity access feed is **context**
 **G5 National operational authority:** *Not implemented or authorized.* Requires entirely separate political, legal, economic, security and democratic decisions. Never label G0-G4 as abolition of commodity production or the law of value.
 
 ### Evidentiary burden for declaring readiness
-- All 27 catalog requirements have multi-source verifications, current coverage and audited uncertainty bounds.
+- All 28 catalog requirements have multi-source verifications, current coverage and audited uncertainty bounds.
 - No essential unmet need hidden by aggregate success statistics.
 - Every material balance closes within physically defensible uncertainty ranges; unexplained residuals trigger adjudication.
 - Plans meet legal safety and environmental constraints under shocks, and can be reproduced from pinned inputs and solver version.
