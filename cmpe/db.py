@@ -62,8 +62,16 @@ class Plan(Base):
     result = Column(JSON,nullable=False)
     created_at = Column(DateTime(timezone=True),default=lambda: datetime.now(timezone.utc),nullable=False)
 
-def engine():
+def database_url():
     url=os.environ.get("CMPE_DATABASE_URL","sqlite:///./cmpe-dev.sqlite3")
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://"+url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://"+url[len("postgresql://"):]
+    return url
+
+def engine():
+    url=database_url()
     kw={"pool_pre_ping":True}
     if url.startswith("sqlite:"):kw["connect_args"]={"check_same_thread":False}
     return create_engine(url,**kw)

@@ -74,7 +74,11 @@ def ready():
 
 @app.get("/")
 def index():
-    return HTMLResponse(Path(__file__).with_name("ui.html").read_text())
+    return HTMLResponse(Path(__file__).with_name("public_ui.html" if os.environ.get("CMPE_PUBLIC_READ_ONLY")=="1" else "ui.html").read_text())
+
+@app.get("/assets/readiness.js")
+def public_script():
+    return FileResponse(Path(__file__).with_name("readiness.js"),media_type="text/javascript")
 
 @app.get("/assets/console.js")
 def script():

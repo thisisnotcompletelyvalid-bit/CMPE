@@ -3,12 +3,12 @@ import os
 from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine, pool
-from cmpe.db import Base
+from cmpe.db import Base, database_url
 
 config=context.config
 if config.config_file_name is not None:fileConfig(config.config_file_name)
 target_metadata=Base.metadata
-url=os.getenv("CMPE_DATABASE_URL","sqlite:///./cmpe-dev.sqlite3")
+url=database_url()
 def run_migrations_offline():
     context.configure(url=url,target_metadata=target_metadata,literal_binds=True,dialect_opts={"paramstyle":"named"})
     with context.begin_transaction():context.run_migrations()
