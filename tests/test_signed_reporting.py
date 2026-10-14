@@ -1,4 +1,7 @@
-import os, base64\nos.environ.setdefault("CMPE_DATABASE_URL","sqlite:///./cmpe-report-test.sqlite3")\nfor role in ("INGEST","REVIEWER_A","REVIEWER_B","PLANNER"):\n    os.environ.setdefault("CMPE_"+role+"_TOKEN",role[0]*40)
+import os, base64
+os.environ.setdefault("CMPE_DATABASE_URL","sqlite:///./cmpe-report-test.sqlite3")
+for role in ("INGEST","REVIEWER_A","REVIEWER_B","PLANNER"):
+    os.environ.setdefault("CMPE_"+role+"_TOKEN",role[0]*40)
 from datetime import datetime, timezone, timedelta
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -6,7 +9,6 @@ from fastapi.testclient import TestClient
 from cmpe.api import app
 from cmpe.reporting import PhysicalReport, SignedEnvelope, authenticate, canonical, flag_reconciliation
 from cmpe.catalog import readiness, inventory
-from cmpe.db import SignedReport,Session if False else SignedReport
 
 def specimen():
     now=datetime.now(timezone.utc)
