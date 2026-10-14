@@ -74,3 +74,19 @@ See [ARCHITECTURE](docs/ARCHITECTURE.md), [SECURITY](docs/SECURITY.md), and [OPE
 ## Intellectual scope
 
 The long-term project studies the engineering conditions for democratic, increasingly nonmarket physical coordination. A numerical optimizer does not abolish commodity production or Marx's law of value. Economic transformation, property rights and decision-making institutions remain separate political and empirical problems.
+
+
+## National information acquisition (current branch)
+
+[Data register and political-economy verification protocol](docs/NATIONAL_DATA_ACQUISITION.md) defines the physical, labor, needs, ecological, external-trade and democratic input requirements. Public `/v1/catalog` and `/v1/readiness` endpoints explicitly show missing evidence; this software **is not nationally ready**.
+
+Registered organizations can submit signed **aggregated** physical reports to secured local research services, using Ed25519 canonical-JSON envelopes, finite typed units, source sequences, physical-balance flagging and quarantine. Two reviewers may classify non-flagged reports as reviewed, but even reviewed reports cannot become optimizer coefficients without separate economic validation. This API is **not** a production audit system: it lacks enterprise identity, external log anchoring, source key rotation, regional replication, field measurement validation, and concurrency-safe reporting ledgers.
+
+The Render `render.yaml` Blueprint deliberately provisions a **read-only** public research interface with an experimental Free-tier database. It does not enable signed intake over the public Internet. The Free database is not a durable national evidence archive; production systems require a paid HA/PostgreSQL tier, encrypted object storage, signed institution gateways and independent governance.
+
+Read the architecture before applying any Blueprint. There is no automatic link between public World Bank observations and physical input-output coefficients.
+
+
+## Scaling calculator
+
+`GET /v1/capacity` calculates data ingress, peak event rate, storage retention and optional user-supplied storage-only unit rates. The solver now uses SciPy sparse CSR matrices and has a 451-activity automated test, but there is no claim of readiness for 100,000+ activities, distributed optimization, national input-output completeness, or continuous national operations. Consult `docs/NATIONAL_DATA_ACQUISITION.md` for all research gates.

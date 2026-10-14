@@ -19,5 +19,5 @@ def test_migration_on_empty_and_preexisting_database(tmp_path, monkeypatch):
         eng=create_engine(url)
         assert "alembic_version" in inspect(eng).get_table_names()
         with eng.connect() as connection:
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar()=="0001_initial"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar()=="0002_signed_reports"
         eng.dispose()

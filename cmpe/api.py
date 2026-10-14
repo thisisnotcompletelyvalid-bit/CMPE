@@ -7,9 +7,12 @@ from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select, func, text
 from sqlalchemy.exc import IntegrityError
-from .db import engine, initialize, sessionmaker_for, Dataset, Approval, Plan, Observation
+from .db import engine, initialize, sessionmaker_for, Dataset, Approval, Plan, Observation, SignedReport, ReportReview
 from .schema import Economy
 from .optimizer import optimize
+from .catalog import inventory, readiness as assess_readiness
+from .reporting import SignedEnvelope, authenticate, flag_reconciliation
+from .capacity import estimate
 
 ENG=engine()
 Session=sessionmaker_for(ENG)
@@ -26,6 +29,8 @@ MAX_BODY=512_000
 
 @app.middleware("http")
 async def security(request:Request,call_next):
+    if os.environ.get("CMPE_PUBLIC_READ_ONLY")=="1" and request.method not in ("GET","HEAD","OPTIONS"):
+        return JSONResponse({"detail":"Public advisory service is read-only"},status_code=403)
     if request.method in ("POST","PUT","PATCH"):
         try: declared=int(request.headers.get("content-length","0"))
         except ValueError: declared=MAX_BODY+1
@@ -74,7 +79,11 @@ def ready():
 
 @app.get("/")
 def index():
-    return HTMLResponse(Path(__file__).with_name("ui.html").read_text())
+    return HTMLResponse(Path(__file__).with_name("public_ui.html" if os.environ.get("CMPE_PUBLIC_READ_ONLY")=="1" else "ui.html").read_text())
+
+@app.get("/assets/readiness.js")
+def public_script():
+    return FileResponse(Path(__file__).with_name("readiness.js"),media_type="text/javascript")
 
 @app.get("/assets/console.js")
 def script():
@@ -148,3 +157,76 @@ def observations(limit:int=50,_:str=Depends(credential("INGEST","PLANNER"))):
     with Session() as db:
         rows=db.scalars(select(Observation).order_by(Observation.id.desc()).limit(limit))
         return [{"provider":r.provider,"location":r.location,"indicator":r.indicator,"period":r.period,"value":r.value,"unit":r.unit,"source_sha256":r.source_sha256} for r in rows]
+
+
+@app.get("/v1/catalog")
+def information_catalog():
+    return {"purpose":"National physical-data inventory; requirements not currently acquired",
+            "requirements": inventory()}
+
+@app.get("/v1/readiness")
+def readiness():
+    return assess_readiness()
+
+@app.post("/v1/reports",status_code=201)
+def accept_signed_report(body:SignedEnvelope, role:str=Depends(credential("INGEST"))):
+    """Verify source signature, prevent replay, quarantine until independent review."""
+    try:
+        digest=authenticate(body)
+    except ValueError as e:
+        raise HTTPException(422,str(e)) from e
+    flags=flag_reconciliation(body.report)
+    with Session.begin() as db:
+        # A full national deployment requires a transactionally locked
+        # organization source registry to serialize concurrent submissions.
+        most_recent=db.scalar(select(func.max(SignedReport.sequence)).where(
+            SignedReport.organization==body.report.organization))
+        if most_recent is not None and body.report.sequence<=most_recent:
+            raise HTTPException(409,"stale or duplicate source sequence")
+        report=SignedReport(
+            organization=body.report.organization,sequence=body.report.sequence,
+            sha256=digest,payload=body.report.model_dump(mode="json"),
+            flags=flags,state="quarantined")
+        db.add(report)
+        try:db.flush()
+        except IntegrityError as e:
+            raise HTTPException(409,"duplicate report") from e
+        identifier=report.id
+    return {"report_id":identifier,"sha256":digest,"state":"quarantined","flags":flags,
+            "model_input_authorized":False}
+
+@app.get("/v1/reports")
+def list_signed_reports(_:str=Depends(credential("INGEST","REVIEWER_A","REVIEWER_B","PLANNER"))):
+    with Session() as db:
+        rows=db.scalars(select(SignedReport).order_by(SignedReport.id.desc()).limit(100))
+        return [{"id":r.id,"organization":r.organization,"sequence":r.sequence,
+                 "sha256":r.sha256,"state":r.state,"flags":r.flags} for r in rows]
+
+@app.post("/v1/reports/{report_id}/review")
+def review_signed_report(report_id:int,role:str=Depends(credential("REVIEWER_A","REVIEWER_B"))):
+    with Session.begin() as db:
+        row=db.scalar(select(SignedReport).where(SignedReport.id==report_id).with_for_update())
+        if row is None:raise HTTPException(404,"unknown report")
+        if row.state!="quarantined":raise HTTPException(409,"report not awaiting review")
+        previous=db.scalar(select(ReportReview).where(
+            ReportReview.report_id==report_id,ReportReview.reviewer==role))
+        if previous:raise HTTPException(409,"reviewer already recorded")
+        db.add(ReportReview(report_id=report_id,reviewer=role));db.flush()
+        count=db.scalar(select(func.count()).select_from(ReportReview).where(
+            ReportReview.report_id==report_id))
+        if count>=2 and not row.flags:
+            row.state="reviewed"
+        return {"report_id":report_id,"state":row.state,"reviews":count,
+                "manual_reconciliation_required":bool(row.flags),
+                "model_input_authorized":False}
+
+
+@app.get("/v1/capacity")
+def capacity(reporters:int=10000,records_per_reporter_daily:int=1000,
+             bytes_per_record:int=1024,retention_years:int=5,
+             storage_copies:int=3,peak_factor:float=8.0,
+             gb_month_usd:float=0.0):
+    try:
+        return estimate(reporters,records_per_reporter_daily,bytes_per_record,
+                        retention_years,storage_copies,peak_factor,gb_month_usd)
+    except ValueError as e:raise HTTPException(422,str(e)) from e

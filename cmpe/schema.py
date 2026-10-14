@@ -17,8 +17,8 @@ class Activity(BaseModel):
 class Economy(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(min_length=1, max_length=120)
-    units: dict[str, str] = Field(min_length=1, max_length=80)
-    activities: list[Activity] = Field(min_length=1, max_length=250)
+    units: dict[str, str] = Field(min_length=1, max_length=2000)
+    activities: list[Activity] = Field(min_length=1, max_length=5000)
     essential_needs: dict[str, float]
     labor_budget_hours: float = Field(gt=0)
     emissions_budget_kg: float = Field(ge=0)
@@ -27,7 +27,7 @@ class Economy(BaseModel):
     @model_validator(mode="after")
     def consistency(self):
         goods = set(self.units)
-        if not goods or len(self.activities) > 250 or len(set(a.name for a in self.activities)) != len(self.activities):
+        if not goods or len(self.activities) > 5000 or len(set(a.name for a in self.activities)) != len(self.activities):
             raise ValueError("duplicate activities or invalid goods")
         for name, unit in self.units.items():
             if not name or len(name)>80 or not unit or len(unit)>50:
