@@ -28,6 +28,8 @@ MAX_BODY=512_000
 
 @app.middleware("http")
 async def security(request:Request,call_next):
+    if os.environ.get("CMPE_PUBLIC_READ_ONLY")=="1" and request.method not in ("GET","HEAD","OPTIONS"):
+        return JSONResponse({"detail":"Public advisory service is read-only"},status_code=403)
     if request.method in ("POST","PUT","PATCH"):
         try: declared=int(request.headers.get("content-length","0"))
         except ValueError: declared=MAX_BODY+1
