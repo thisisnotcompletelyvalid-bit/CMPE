@@ -85,3 +85,8 @@ Registered organizations can submit signed **aggregated** physical reports to se
 The Render `render.yaml` Blueprint deliberately provisions a **read-only** public research interface with an experimental Free-tier database. It does not enable signed intake over the public Internet. The Free database is not a durable national evidence archive; production systems require a paid HA/PostgreSQL tier, encrypted object storage, signed institution gateways and independent governance.
 
 Read the architecture before applying any Blueprint. There is no automatic link between public World Bank observations and physical input-output coefficients.
+
+
+## Scaling calculator
+
+`GET /v1/capacity` calculates data ingress, peak event rate, storage retention and optional user-supplied storage-only unit rates. The solver now uses SciPy sparse CSR matrices and has a 451-activity automated test, but there is no claim of readiness for 100,000+ activities, distributed optimization, national input-output completeness, or continuous national operations. Consult `docs/NATIONAL_DATA_ACQUISITION.md` for all research gates.

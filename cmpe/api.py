@@ -12,6 +12,7 @@ from .schema import Economy
 from .optimizer import optimize
 from .catalog import inventory, readiness as assess_readiness
 from .reporting import SignedEnvelope, authenticate, flag_reconciliation
+from .capacity import estimate
 
 ENG=engine()
 Session=sessionmaker_for(ENG)
@@ -218,3 +219,14 @@ def review_signed_report(report_id:int,role:str=Depends(credential("REVIEWER_A",
         return {"report_id":report_id,"state":row.state,"reviews":count,
                 "manual_reconciliation_required":bool(row.flags),
                 "model_input_authorized":False}
+
+
+@app.get("/v1/capacity")
+def capacity(reporters:int=10000,records_per_reporter_daily:int=1000,
+             bytes_per_record:int=1024,retention_years:int=5,
+             storage_copies:int=3,peak_factor:float=8.0,
+             gb_month_usd:float=0.0):
+    try:
+        return estimate(reporters,records_per_reporter_daily,bytes_per_record,
+                        retention_years,storage_copies,peak_factor,gb_month_usd)
+    except ValueError as e:raise HTTPException(422,str(e)) from e
